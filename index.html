@@ -263,28 +263,44 @@ footer{margin-top:3.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)
   </div>
 
   <div class="bot-wrap">
-    <div class="bot-label">REX Bot — example notification messages</div>
+    <div class="bot-label">@RexAssistantBot — full status notification flow · <a href="https://www.notion.so/chainlabs/REX-Assistant-Bot-31861d2f626c80f6b32ddf6df70bc958" target="_blank" style="color:var(--purple);text-decoration:none;">Bot documentation</a></div>
+
     <div class="bot-msg">
-      <div class="bot-from">To: Freelancer X (individual DM) · on Dep - Sent</div>
-      Funds have been sent to your ByBit account — 0.000030 BTC is on its way. Please confirm once received.
+      <div class="bot-from">Dep - Pending · To: REX Ops groupchat (Kunal + Mally)</div>
+      New Dep - Pending logged. Freelancer X · ByBit · BTC · 0.000030 BTC · Address: 1AP514M5KEhAhB4X9reH2wt9qB64wuMcza · Proof link confirmed. Ready to fund when wallet balance allows.
     </div>
+
     <div class="bot-msg">
-      <div class="bot-from">To: REX Ops groupchat (Kunal + Mally) · on Dep - Received</div>
-      Freelancer X confirmed deposit received on ByBit (BTC). Status updated to Dep - Received. Withdrawal - Pending set — no action needed.
+      <div class="bot-from">Dep - Sent · To: Freelancer X (individual DM)</div>
+      Funds are on their way to your ByBit account — 0.000030 BTC sent. Please confirm once you see it arrive.
     </div>
+
     <div class="bot-msg">
-      <div class="bot-from">To: Freelancer X (individual DM) · on With - Pending</div>
-      ByBit BTC deposit trace confirmed. Please complete the withdrawal back to the Chainlabs return address when ready.
+      <div class="bot-from">Dep - Received · To: REX Ops groupchat (Kunal + Mally)</div>
+      Freelancer X confirmed deposit received on ByBit (BTC). Please set the withdrawal address and update status to With - Pending to unblock the next step.
     </div>
+
     <div class="bot-msg">
-      <div class="bot-from">To: REX Ops groupchat · on With - Sent</div>
-      Freelancer X submitted ByBit (BTC) withdrawal. TXID received. Please confirm receipt and mark With - Received.
+      <div class="bot-from">With - Pending · To: Freelancer X (individual DM)</div>
+      ByBit BTC deposit confirmed. You can now withdraw back to the Chainlabs return address: <span style="color:var(--blue)">1Chainlabs...ReturnAddr</span> · Please complete the withdrawal when ready.
     </div>
+
     <div class="bot-msg">
-      <div class="bot-from">To: Freelancer group · on Dep - Issue or With - Issue</div>
-      There is an issue flagged on your ByBit (BTC) trace. Kunal will reach out directly to resolve.
+      <div class="bot-from">With - Sent · To: REX Ops groupchat (Kunal + Mally)</div>
+      Freelancer X submitted ByBit (BTC) withdrawal. Please confirm on-chain receipt and mark With - Received to complete the trace.
     </div>
-    <div class="bot-note">No reply command needed from freelancers — the notification is informational. Status updates are made directly in the sheet (or Retool once migrated), which triggers the next bot message automatically. Retool Workflows natively supports webhook triggers (docs.retool.com/workflows/guides/webhooks) meaning the same notification logic can be replicated without Google Apps Script when we move off Sheets — a status change in Retool fires a POST to the webhook endpoint, which the bot picks up and routes to the right Telegram chat.</div>
+
+    <div class="bot-msg">
+      <div class="bot-from">With - Received · To: Freelancer X (individual DM)</div>
+      ByBit BTC withdrawal confirmed received. Trace complete for this token — thank you.
+    </div>
+
+    <div class="bot-msg">
+      <div class="bot-from">Dep - Issue / With - Issue / Other Issue · To: Freelancer group (shared)</div>
+      Issue flagged on Freelancer X · ByBit · BTC trace. Please post details here so we can resolve together. Kunal and Mally will pick this up shortly.
+    </div>
+
+    <div class="bot-note">No reply commands needed from freelancers — all notifications are informational. Status updates are made in the sheet or Retool, which triggers the next message automatically. Retool Workflows supports webhook triggers natively (docs.retool.com/workflows/guides/webhooks) — when we migrate off Sheets, a status change in Retool fires a POST to the REX Bot webhook endpoint directly. The bot does not replace existing freelancer group chats — it complements them by keeping operational pings out of those groups and routing them to the right place.</div>
   </div>
 
   <div class="callout c-purple">
@@ -357,27 +373,7 @@ footer{margin-top:3.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)
     </div>
   </div>
 
-  <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">On-chain network fees are paid regardless of which platform we use. The breakdown below covers all chains we currently monitor — grouped by cost profile.</p>
-
-  <div class="fee-grid">
-    <div class="fee-item"><div class="fee-chain">Solana (SOL)</div><div class="fee-cost cheap">~$0.001</div><div class="fee-note">Near zero. Fastest finality.</div></div>
-    <div class="fee-item"><div class="fee-chain">Polygon (USDT-POL)</div><div class="fee-cost cheap">~$0.01</div><div class="fee-note">Default freelancer payment rail.</div></div>
-    <div class="fee-item"><div class="fee-chain">Litecoin (LTC)</div><div class="fee-cost cheap">~$0.01–0.05</div><div class="fee-note">Fast, cheap, widely listed.</div></div>
-    <div class="fee-item"><div class="fee-chain">XRP (Ripple)</div><div class="fee-cost cheap">~$0.01–0.05</div><div class="fee-note">Requires destination tag — already captured.</div></div>
-    <div class="fee-item"><div class="fee-chain">TON</div><div class="fee-cost cheap">~$0.01–0.05</div><div class="fee-note">Requires memo — already captured.</div></div>
-    <div class="fee-item"><div class="fee-chain">Stellar (XLM)</div><div class="fee-cost cheap">~$0.01</div><div class="fee-note">Requires memo — already captured.</div></div>
-    <div class="fee-item"><div class="fee-chain">TRON (TRX/USDT-TRC20)</div><div class="fee-cost cheap">~$0.20–0.50</div><div class="fee-note">High use across Africa and Asia.</div></div>
-    <div class="fee-item"><div class="fee-chain">Dogecoin (DOGE)</div><div class="fee-cost cheap">~$0.10–0.30</div><div class="fee-note">Common on African regional exchanges.</div></div>
-    <div class="fee-item"><div class="fee-chain">Cardano (ADA)</div><div class="fee-cost cheap">~$0.15–0.30</div><div class="fee-note">Fixed fee model — predictable.</div></div>
-    <div class="fee-item"><div class="fee-chain">Arbitrum (ARB)</div><div class="fee-cost mid">~$0.05–0.20</div><div class="fee-note">L2 — cheaper than mainnet ETH.</div></div>
-    <div class="fee-item"><div class="fee-chain">Optimism (OP)</div><div class="fee-cost mid">~$0.05–0.20</div><div class="fee-note">L2 — same EVM address format as ARB.</div></div>
-    <div class="fee-item"><div class="fee-chain">BNB / BSC</div><div class="fee-cost mid">~$0.10–0.50</div><div class="fee-note">EVM-compatible, moderate cost.</div></div>
-    <div class="fee-item"><div class="fee-chain">Polkadot (DOT)</div><div class="fee-cost mid">~$0.10–0.30</div><div class="fee-note">Moderate. Substrate network.</div></div>
-    <div class="fee-item"><div class="fee-chain">Bitcoin (BTC)</div><div class="fee-cost pricey">~$1.00–3.00</div><div class="fee-note">Highest fee. ~15% of our sends.</div></div>
-    <div class="fee-item"><div class="fee-chain">Ethereum (ETH/ERC20)</div><div class="fee-cost pricey">~$1.00–5.00</div><div class="fee-note">Variable with congestion. ~10% of sends.</div></div>
-  </div>
-
-  <div class="cards" style="margin-top:20px">
+  <div class="cards" style="margin-top:0">
     <div class="card rec">
       <div class="badge badge-g">Recommended</div>
       <div class="card-name">NOWPayments</div>
@@ -520,7 +516,7 @@ footer{margin-top:3.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)
     </div>
     <div class="change-card ac">
       <div class="change-head">Custody float sign-off needed</div>
-      <div class="change-body">Funds sit in NOWPayments custody until disbursed. Basile sign-off on float amount required before setup. Standard for any payment processor.</div>
+      <div class="change-body">Funds sit in NOWPayments custody until disbursed. Tyron sign-off on float amount required before setup. Standard for any payment processor.</div>
     </div>
     <div class="change-card ac">
       <div class="change-head">Rotation build — one-time</div>
