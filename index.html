@@ -3,585 +3,571 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trace Funding Cost Calculator — Chainlabs REX</title>
+<title>REX Trace Funding — Tool Assessment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0e;--s1:#131315;--s2:#1a1a1d;--s3:#222226;
+  --border:rgba(255,255,255,0.06);--border-md:rgba(255,255,255,0.11);
+  --text:#eeecea;--muted:#7a7975;--faint:#3e3e3c;
+  --green:#3dd68c;--green-bg:rgba(61,214,140,0.09);--green-border:rgba(61,214,140,0.22);
+  --amber:#f0a640;--amber-bg:rgba(240,166,64,0.09);--amber-border:rgba(240,166,64,0.28);
+  --red:#e05c5c;--red-bg:rgba(224,92,92,0.09);--red-border:rgba(224,92,92,0.28);
+  --blue:#6b9cf5;--blue-bg:rgba(107,156,245,0.09);--blue-border:rgba(107,156,245,0.28);
+  --purple:#a78bfa;--purple-bg:rgba(167,139,250,0.09);--purple-border:rgba(167,139,250,0.25);
+  --teal:#2dd4bf;--teal-bg:rgba(45,212,191,0.09);--teal-border:rgba(45,212,191,0.25);
+  --mono:'DM Mono',monospace;--sans:'Syne',sans-serif;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;line-height:1.65}
+.page{max-width:940px;margin:0 auto;padding:3.5rem 1.75rem 7rem}
 
-  :root {
-    --bg: #0d0d0f;
-    --surface: #141416;
-    --surface-2: #1c1c1f;
-    --border: rgba(255,255,255,0.07);
-    --border-accent: rgba(255,255,255,0.14);
-    --text-primary: #f0efe8;
-    --text-secondary: #8a8982;
-    --text-tertiary: #4a4a48;
-    --green: #3dd68c;
-    --green-dim: rgba(61,214,140,0.12);
-    --green-border: rgba(61,214,140,0.25);
-    --amber: #f5a623;
-    --amber-dim: rgba(245,166,35,0.10);
-    --red: #e05c5c;
-    --red-dim: rgba(224,92,92,0.10);
-    --blue: #5b8ef0;
-    --blue-dim: rgba(91,142,240,0.10);
-    --mono: 'DM Mono', monospace;
-    --sans: 'Syne', sans-serif;
-  }
+header{margin-bottom:3rem;padding-bottom:2rem;border-bottom:0.5px solid var(--border)}
+.stamp{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:0.14em;color:var(--muted);text-transform:uppercase;border:0.5px solid var(--border-md);border-radius:4px;padding:4px 10px;margin-bottom:20px}
+.stamp-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.5s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+h1{font-size:clamp(26px,4.5vw,44px);font-weight:800;line-height:1.05;letter-spacing:-0.03em;margin-bottom:10px}
+h1 em{font-style:normal;color:var(--green)}
+.tagline{font-family:var(--mono);font-size:12px;color:var(--muted);max-width:600px;line-height:1.7}
 
-  html { font-size: 16px; }
+.section{margin-bottom:3rem}
+.section-head{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10px;letter-spacing:0.14em;color:var(--faint);text-transform:uppercase;margin-bottom:20px}
+.section-head::after{content:'';flex:1;height:0.5px;background:var(--border)}
 
-  body {
-    background: var(--bg);
-    color: var(--text-primary);
-    font-family: var(--sans);
-    min-height: 100vh;
-    line-height: 1.6;
-  }
+/* PROCESS FLOW */
+.flow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.flow-card{background:var(--s1);border:0.5px solid var(--border);border-radius:10px;padding:14px;position:relative}
+.flow-card.ok{border-color:var(--green-border)}
+.flow-card.hot{border-color:var(--amber-border);background:linear-gradient(135deg,var(--s1) 70%,rgba(240,166,64,0.04))}
+.flow-card.future-card{border-color:var(--blue-border)}
+.flow-num{font-family:var(--mono);font-size:10px;color:var(--faint);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.flow-dot{width:5px;height:5px;border-radius:50%}
+.dot-ok{background:var(--green)}
+.dot-hot{background:var(--amber)}
+.dot-future{background:var(--blue)}
+.flow-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.2}
+.flow-body{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.55}
+.flow-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;letter-spacing:0.03em}
+.tag-ok{background:var(--green-bg);color:var(--green);border:0.5px solid var(--green-border)}
+.tag-hot{background:var(--amber-bg);color:var(--amber);border:0.5px solid var(--amber-border)}
+.tag-block{background:var(--red-bg);color:var(--red);border:0.5px solid var(--red-border)}
+.tag-future{background:var(--blue-bg);color:var(--blue);border:0.5px solid var(--blue-border)}
+.tag-bot{background:var(--purple-bg);color:var(--purple);border:0.5px solid var(--purple-border)}
 
-  .grain {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    opacity: 0.4;
-  }
+/* CALLOUTS */
+.callout{border-radius:0 8px 8px 0;padding:13px 16px;margin:14px 0;font-size:12px;line-height:1.7;font-family:var(--mono);color:var(--text)}
+.c-amber{background:var(--amber-bg);border-left:2px solid var(--amber);border:0.5px solid var(--amber-border);border-left:2px solid var(--amber)}
+.c-blue{background:var(--blue-bg);border-left:2px solid var(--blue);border:0.5px solid var(--blue-border);border-left:2px solid var(--blue)}
+.c-green{background:var(--green-bg);border-left:2px solid var(--green);border:0.5px solid var(--green-border);border-left:2px solid var(--green)}
+.c-purple{background:var(--purple-bg);border-left:2px solid var(--purple);border:0.5px solid var(--purple-border);border-left:2px solid var(--purple)}
+.c-amber strong{color:var(--amber)}
+.c-blue strong{color:var(--blue)}
+.c-green strong{color:var(--green)}
+.c-purple strong{color:var(--purple)}
 
-  .page {
-    position: relative; z-index: 1;
-    max-width: 820px;
-    margin: 0 auto;
-    padding: 4rem 2rem 6rem;
-  }
+/* STATUS FLOW */
+.status-flow{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:14px 0}
+.sp{font-family:var(--mono);font-size:11px;padding:4px 11px;border-radius:20px;white-space:nowrap}
+.sp-gray{background:var(--s3);color:var(--muted);border:0.5px solid var(--border-md)}
+.sp-amber{background:var(--amber-bg);color:var(--amber);border:0.5px solid var(--amber-border)}
+.sp-blue{background:var(--blue-bg);color:var(--blue);border:0.5px solid var(--blue-border)}
+.sp-purple{background:var(--purple-bg);color:var(--purple);border:0.5px solid var(--purple-border)}
+.sp-teal{background:var(--teal-bg);color:var(--teal);border:0.5px solid var(--teal-border)}
+.sp-green{background:var(--green-bg);color:var(--green);border:0.5px solid var(--green-border)}
+.sp-red{background:var(--red-bg);color:var(--red);border:0.5px solid var(--red-border)}
+.arr{color:var(--faint);font-size:11px;font-family:var(--mono)}
 
-  header {
-    margin-bottom: 3rem;
-    border-bottom: 0.5px solid var(--border);
-    padding-bottom: 2rem;
-  }
+/* BOT MESSAGES */
+.bot-wrap{background:var(--s2);border:0.5px solid var(--purple-border);border-radius:10px;padding:1rem 1.25rem;margin:12px 0}
+.bot-label{font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.bot-label::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--purple);display:inline-block}
+.bot-msg{background:var(--s3);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--text);line-height:1.6;margin-bottom:8px}
+.bot-msg:last-of-type{margin-bottom:0}
+.bot-from{font-size:10px;color:var(--purple);margin-bottom:4px;font-weight:500}
+.bot-note{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:10px;font-style:italic;line-height:1.55}
 
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    color: var(--green);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+/* TABLES */
+.tbl-wrap{overflow-x:auto;margin:12px 0;border-radius:8px;border:0.5px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+thead tr{background:var(--s2)}
+th{padding:8px 12px;text-align:left;color:var(--muted);font-weight:500;letter-spacing:0.06em;text-transform:uppercase;font-size:10px;border-bottom:0.5px solid var(--border-md);white-space:nowrap}
+td{padding:7px 12px;color:var(--text);border-bottom:0.5px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:rgba(255,255,255,0.012)}
+.td-g{color:var(--green)}.td-a{color:var(--amber)}.td-r{color:var(--red)}.td-m{color:var(--muted)}.td-b{color:var(--blue)}.td-p{color:var(--purple)}
+.mono-xs{font-family:var(--mono);font-size:10px;color:var(--muted);word-break:break-all}
 
-  .eyebrow::before {
-    content: '';
-    display: inline-block;
-    width: 20px;
-    height: 1px;
-    background: var(--green);
-  }
+/* NETWORK FEES */
+.fee-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:8px;margin:14px 0}
+.fee-item{background:var(--s1);border:0.5px solid var(--border);border-radius:8px;padding:10px 14px}
+.fee-chain{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.fee-cost{font-family:var(--mono);font-size:13px;font-weight:500}
+.fee-cost.cheap{color:var(--green)}
+.fee-cost.mid{color:var(--amber)}
+.fee-cost.pricey{color:var(--red)}
+.fee-note{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:2px}
 
-  h1 {
-    font-family: var(--sans);
-    font-size: clamp(28px, 5vw, 42px);
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin-bottom: 10px;
-  }
+/* PORTFOLIOS */
+.port-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;margin:14px 0}
+.port-card{background:var(--s1);border:0.5px solid var(--border);border-radius:10px;padding:1rem}
+.port-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.port-desc{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5}
+.port-card.pgc{border-color:var(--green-border)}
+.port-card.pbc{border-color:var(--blue-border)}
+.port-card.ptc{border-color:var(--teal-border)}
+.port-card.ppc{border-color:var(--purple-border)}
+.port-card.pac{border-color:var(--amber-border)}
+.port-accent{width:3px;height:20px;border-radius:2px;margin-bottom:10px}
+.pa-g{background:var(--green)}
+.pa-b{background:var(--blue)}
+.pa-t{background:var(--teal)}
+.pa-p{background:var(--purple)}
+.pa-a{background:var(--amber)}
 
-  h1 span { color: var(--green); }
+/* SLIDERS */
+.assumptions{background:var(--s1);border:0.5px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:20px}
+.slider-row{margin-bottom:16px}
+.slider-row:last-of-type{margin-bottom:0}
+.slider-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.slider-label{font-size:12px;color:var(--muted)}
+.slider-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text)}
+input[type=range]{-webkit-appearance:none;width:100%;height:2px;background:var(--s3);border-radius:2px;cursor:pointer;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 0 0 3px rgba(61,214,140,0.13)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--green);border:none;cursor:pointer}
+.derived{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;padding-top:16px;border-top:0.5px solid var(--border)}
+.dl{font-family:var(--mono);font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px}
+.dv{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text)}
 
-  .subtitle {
-    font-size: 14px;
-    color: var(--text-secondary);
-    font-family: var(--mono);
-    margin-top: 6px;
-  }
+/* COST CARDS */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.card{background:var(--s1);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem}
+.card.rec{border-color:var(--green-border)}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+.badge-g{background:var(--green-bg);color:var(--green);border:0.5px solid var(--green-border)}
+.badge-b{background:var(--blue-bg);color:var(--blue);border:0.5px solid var(--blue-border)}
+.card-name{font-size:18px;font-weight:700;letter-spacing:-0.01em;margin-bottom:2px}
+.card-sub{font-family:var(--mono);font-size:11px;color:var(--faint);margin-bottom:12px}
+.price{font-family:var(--mono);font-size:26px;font-weight:500;line-height:1}
+.price.gp{color:var(--green)}
+.price-note{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px;margin-bottom:12px}
+hr.dv{border:none;border-top:0.5px solid var(--border);margin:10px 0}
+.fr{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0}
+.fl{color:var(--muted)}
+.fv{font-family:var(--mono);font-weight:500}
+.fv.g{color:var(--green)}.fv.a{color:var(--amber)}.fv.r{color:var(--red)}.fv.m{color:var(--muted)}
+.card-foot{font-family:var(--mono);font-size:11px;color:var(--faint);line-height:1.55;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border)}
 
-  .section-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
+.totals{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.metric{background:var(--s1);border:0.5px solid var(--border);border-radius:10px;padding:1rem;text-align:center}
+.metric.win{border-color:var(--green-border);background:var(--green-bg)}
+.ml{font-family:var(--mono);font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px}
+.mv{font-family:var(--mono);font-size:24px;font-weight:500}
+.metric.win .mv{color:var(--green)}
+.verdict{border-left:2px solid var(--green);background:var(--s2);border-radius:0 8px 8px 0;padding:13px 16px;font-size:12px;color:var(--muted);line-height:1.75}
+.verdict strong{color:var(--text);font-weight:600}
+.verdict .g{color:var(--green);font-family:var(--mono)}
+.verdict .a{color:var(--amber);font-family:var(--mono)}
 
-  /* ASSUMPTIONS */
-  .assumptions {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 28px;
-  }
+.changes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.change-card{background:var(--s1);border:0.5px solid var(--border);border-radius:10px;padding:1rem}
+.change-head{font-size:12px;font-weight:700;margin-bottom:5px;color:var(--text)}
+.change-body{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.55}
+.change-card.gc{border-color:var(--green-border)}
+.change-card.ac{border-color:var(--amber-border)}
 
-  .slider-block {
-    margin-bottom: 20px;
-  }
+footer{margin-top:3.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;color:var(--faint);flex-wrap:wrap;gap:8px}
 
-  .slider-block:last-child { margin-bottom: 0; }
-
-  .slider-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 8px;
-  }
-
-  .slider-name {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-
-  .slider-value {
-    font-family: var(--mono);
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-primary);
-  }
-
-  input[type="range"] {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 2px;
-    background: var(--border-accent);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-  }
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--green);
-    cursor: pointer;
-    box-shadow: 0 0 0 3px rgba(61,214,140,0.15);
-    transition: box-shadow 0.15s;
-  }
-
-  input[type="range"]::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 0 5px rgba(61,214,140,0.22);
-  }
-
-  input[type="range"]::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--green);
-    cursor: pointer;
-    border: none;
-  }
-
-  .derived-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 0.5px solid var(--border);
-  }
-
-  .derived-item {}
-
-  .derived-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-tertiary);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  .derived-val {
-    font-family: var(--mono);
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--text-primary);
-  }
-
-  /* CARDS */
-  .cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-
-  @media (max-width: 600px) {
-    .cards { grid-template-columns: 1fr; }
-    .derived-grid { grid-template-columns: 1fr 1fr; }
-  }
-
-  .card {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card.recommended {
-    border-color: var(--green-border);
-    background: linear-gradient(135deg, var(--surface) 60%, rgba(61,214,140,0.04) 100%);
-  }
-
-  .card-badge {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 20px;
-    margin-bottom: 12px;
-  }
-
-  .badge-green { background: var(--green-dim); color: var(--green); border: 0.5px solid var(--green-border); }
-  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 0.5px solid rgba(91,142,240,0.25); }
-
-  .card-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-    margin-bottom: 2px;
-  }
-
-  .card-desc {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-tertiary);
-    margin-bottom: 16px;
-  }
-
-  .price-block {
-    margin-bottom: 16px;
-  }
-
-  .price-main {
-    font-family: var(--mono);
-    font-size: 30px;
-    font-weight: 500;
-    color: var(--text-primary);
-    line-height: 1;
-  }
-
-  .price-main.green { color: var(--green); }
-
-  .price-sub {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-tertiary);
-    margin-top: 3px;
-  }
-
-  .divider {
-    border: none;
-    border-top: 0.5px solid var(--border);
-    margin: 14px 0;
-  }
-
-  .fee-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    padding: 4px 0;
-  }
-
-  .fee-label { color: var(--text-secondary); }
-
-  .fee-val {
-    font-family: var(--mono);
-    font-weight: 500;
-  }
-
-  .fee-val.green { color: var(--green); }
-  .fee-val.amber { color: var(--amber); }
-  .fee-val.red { color: var(--red); }
-  .fee-val.muted { color: var(--text-secondary); }
-
-  .card-note {
-    margin-top: 14px;
-    font-size: 11px;
-    color: var(--text-tertiary);
-    font-family: var(--mono);
-    line-height: 1.5;
-    padding-top: 12px;
-    border-top: 0.5px solid var(--border);
-  }
-
-  /* SUMMARY */
-  .summary-row-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .metric-card {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: 10px;
-    padding: 1.25rem;
-    text-align: center;
-  }
-
-  .metric-card.highlight {
-    border-color: var(--green-border);
-    background: var(--green-dim);
-  }
-
-  .metric-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-tertiary);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-
-  .metric-val {
-    font-family: var(--mono);
-    font-size: 28px;
-    font-weight: 500;
-    color: var(--text-primary);
-  }
-
-  .metric-card.highlight .metric-val { color: var(--green); }
-
-  /* VERDICT */
-  .verdict {
-    background: var(--surface-2);
-    border: 0.5px solid var(--border);
-    border-left: 2px solid var(--green);
-    border-radius: 0 10px 10px 0;
-    padding: 1rem 1.25rem;
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-  }
-
-  .verdict strong { color: var(--text-primary); font-weight: 600; }
-  .verdict .highlight-green { color: var(--green); font-family: var(--mono); font-weight: 500; }
-  .verdict .highlight-amber { color: var(--amber); font-family: var(--mono); font-weight: 500; }
-
-  footer {
-    margin-top: 4rem;
-    padding-top: 1.5rem;
-    border-top: 0.5px solid var(--border);
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-tertiary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .dot {
-    display: inline-block;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    margin-right: 6px;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .fade-in {
-    animation: fadeIn 0.5s ease forwards;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+@media(max-width:640px){
+  .flow-grid,.cards,.changes,.totals,.port-grid,.derived{grid-template-columns:1fr}
+  .fee-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
-<div class="grain"></div>
-<div class="page fade-in">
+<div class="page">
 
-  <header>
-    <div class="eyebrow">Chainlabs REX — Internal Tool</div>
-    <h1>Trace Funding<br><span>Cost Calculator</span></h1>
-    <div class="subtitle">NOWPayments vs Fireblocks — real cost at your scale</div>
-  </header>
+<header>
+  <div class="stamp"><span class="stamp-dot"></span>Internal — REX Operations · March 2026</div>
+  <h1>Trace Funding<br><em>Tool Assessment</em></h1>
+  <p class="tagline">NOWPayments vs Fireblocks — full evaluation covering process context, cost modelling, transaction tracking, wallet rotation strategy, notification infrastructure, and centralised visibility. Internal use only.</p>
+</header>
 
-  <!-- ASSUMPTIONS -->
-  <div class="section-label" style="margin-bottom:14px;">Your operation</div>
-  <div class="assumptions">
-    <div class="slider-block">
-      <div class="slider-header">
-        <span class="slider-name">Active freelancers</span>
-        <span class="slider-value" id="out-freelancers">47</span>
-      </div>
-      <input type="range" min="5" max="47" value="47" id="sl-freelancers">
-    </div>
-    <div class="slider-block">
-      <div class="slider-header">
-        <span class="slider-name">Trace sends per freelancer / month</span>
-        <span class="slider-value" id="out-sends">17</span>
-      </div>
-      <input type="range" min="3" max="30" value="17" id="sl-sends">
-    </div>
-    <div class="slider-block">
-      <div class="slider-header">
-        <span class="slider-name">Avg send size (USD equiv.)</span>
-        <span class="slider-value" id="out-size">$5</span>
-      </div>
-      <input type="range" min="1" max="25" value="5" id="sl-size">
-    </div>
-    <div class="derived-grid">
-      <div class="derived-item">
-        <div class="derived-label">Total sends / mo</div>
-        <div class="derived-val" id="d-sends">799</div>
-      </div>
-      <div class="derived-item">
-        <div class="derived-label">Volume / mo (USD)</div>
-        <div class="derived-val" id="d-vol">$3,995</div>
-      </div>
-      <div class="derived-item">
-        <div class="derived-label">Wallet rotations</div>
-        <div class="derived-val">1 / mo</div>
-      </div>
-    </div>
-  </div>
+<!-- 01 PROCESS -->
+<div class="section">
+  <div class="section-head">01 — Current trace process and where the pain is</div>
 
-  <!-- CARDS -->
-  <div class="section-label" style="margin-bottom:14px;">Platform breakdown</div>
-  <div class="cards">
-    <div class="card recommended">
-      <div class="card-badge badge-green">Recommended</div>
-      <div class="card-title">NOWPayments</div>
-      <div class="card-desc">Mass payouts — CSV or API</div>
-      <div class="price-block">
-        <div class="price-main green" id="np-total">—</div>
-        <div class="price-sub">estimated monthly cost</div>
-      </div>
-      <hr class="divider">
-      <div class="fee-row"><span class="fee-label">Platform fee</span><span class="fee-val green">$0 / month</span></div>
-      <div class="fee-row"><span class="fee-label">Payout service fee</span><span class="fee-val green">0%</span></div>
-      <div class="fee-row"><span class="fee-label">Custody deposit (0.5%)</span><span class="fee-val amber" id="np-custody">—</span></div>
-      <hr class="divider">
-      <div class="fee-row"><span class="fee-label">Network fees (est.)</span><span class="fee-val amber" id="np-network">—</span></div>
-      <div class="fee-row" style="padding-left:10px; opacity:0.7;"><span class="fee-label">Polygon/TRC20 avg ~$0.15</span><span class="fee-val muted">60%</span></div>
-      <div class="fee-row" style="padding-left:10px; opacity:0.7;"><span class="fee-label">ETH/BNB avg ~$1.50</span><span class="fee-val muted">25%</span></div>
-      <div class="fee-row" style="padding-left:10px; opacity:0.7;"><span class="fee-label">BTC avg ~$2.00</span><span class="fee-val muted">15%</span></div>
-      <hr class="divider">
-      <div class="fee-row"><span class="fee-label">Wallet rotation</span><span class="fee-val amber">Manual / scripted</span></div>
-      <div class="fee-row"><span class="fee-label">Setup cost</span><span class="fee-val green">$0</span></div>
-      <div class="card-note">Custody balance pre-funded by Chainlabs. Rotation needs ~1 day of Apps Script work. XRP/TON memos already captured in freelancer sheets.</div>
+  <div class="flow-grid">
+    <div class="flow-card ok">
+      <div class="flow-num"><span class="flow-dot dot-ok"></span>Step 1</div>
+      <div class="flow-title">KYC and registration</div>
+      <div class="flow-body">Freelancer registers on assigned exchange, completes local KYC using their ID. Status logged in Metadata tab.</div>
+      <div class="flow-tags"><span class="tag tag-ok">Freelancer-owned</span></div>
     </div>
-
-    <div class="card">
-      <div class="card-badge badge-blue">Enterprise</div>
-      <div class="card-title">Fireblocks</div>
-      <div class="card-desc">Institutional treasury infra</div>
-      <div class="price-block">
-        <div class="price-main" id="fb-total">—</div>
-        <div class="price-sub">estimated monthly cost</div>
-      </div>
-      <hr class="divider">
-      <div class="fee-row"><span class="fee-label">Platform (Essentials plan)</span><span class="fee-val amber">~$1,000–2,000/mo</span></div>
-      <div class="fee-row"><span class="fee-label">Transaction fee (0.20%)</span><span class="fee-val amber" id="fb-tx">—</span></div>
-      <hr class="divider">
-      <div class="fee-row"><span class="fee-label">Network fees (est.)</span><span class="fee-val amber" id="fb-network">—</span></div>
-      <div class="fee-row"><span class="fee-label">Wallet rotation</span><span class="fee-val green">Native / automated</span></div>
-      <div class="fee-row"><span class="fee-label">Setup / onboarding</span><span class="fee-val red">Weeks + legal review</span></div>
-      <div class="card-note">Custom enterprise pricing — $1k/mo is the public floor estimate. Actual quote requires a sales call. Only worth it above ~$1M/month in assets under management.</div>
+    <div class="flow-card ok">
+      <div class="flow-num"><span class="flow-dot dot-ok"></span>Step 2</div>
+      <div class="flow-title">Address and amount capture</div>
+      <div class="flow-body">Deposit address, memo/tag, and minimum safe dep&amp;with amount recorded per token. Proof screenshot uploaded. Status set to <strong>Dep - Pending</strong>.</div>
+      <div class="flow-tags"><span class="tag tag-ok">Freelancer-owned</span><span class="tag tag-ok">Working well</span></div>
+    </div>
+    <div class="flow-card hot">
+      <div class="flow-num"><span class="flow-dot dot-hot"></span>Step 3</div>
+      <div class="flow-title">Funding execution</div>
+      <div class="flow-body">Kunal (Mally occasionally) reviews sheets, validates proof, checks min/max amounts, confirms wallet balance per chain. If insufficient: requests top-up, executes swap, or switches between Exodus and CEX. Once ready: sends funds, captures TxID, on-chain fee and amount, updates status to <strong>Dep - Sent</strong>.<br><br>30 freelancers x 17 tokens = 500+ manual sends per cycle across 21 chains.</div>
+      <div class="flow-tags"><span class="tag tag-block">Primary bottleneck</span><span class="tag tag-hot">500+ sends/cycle</span><span class="tag tag-hot">Multi-wallet juggling</span></div>
+    </div>
+    <div class="flow-card ok">
+      <div class="flow-num"><span class="flow-dot dot-ok"></span>Step 4</div>
+      <div class="flow-title">Deposit received</div>
+      <div class="flow-body">Funds arrive on exchange. Freelancer executes the deposit trace, records from-address, screenshots once confirmed.</div>
+      <div class="flow-tags"><span class="tag tag-ok">Freelancer-owned</span><span class="tag tag-ok">Unblocked once funded</span></div>
+    </div>
+    <div class="flow-card ok">
+      <div class="flow-num"><span class="flow-dot dot-ok"></span>Step 5</div>
+      <div class="flow-title">Withdrawal</div>
+      <div class="flow-body">Freelancer withdraws full amount back to the Chainlabs return address. TXID, on-chain fee, and proof screenshot logged.</div>
+      <div class="flow-tags"><span class="tag tag-ok">Freelancer-owned</span><span class="tag tag-ok">No bottleneck</span></div>
+    </div>
+    <div class="flow-card ok">
+      <div class="flow-num"><span class="flow-dot dot-ok"></span>Step 6</div>
+      <div class="flow-title">Documentation and QC</div>
+      <div class="flow-body">Transaction hash, proof link, and trace type logged. QC marks row ready. Chainlabs return addresses rotated at each cycle — currently manual.</div>
+      <div class="flow-tags"><span class="tag tag-ok">Established</span><span class="tag tag-hot">Rotation gap remains</span></div>
     </div>
   </div>
 
-  <!-- SUMMARY METRICS -->
-  <div class="section-label" style="margin-bottom:14px;">Monthly total</div>
-  <div class="summary-row-grid">
-    <div class="metric-card highlight">
-      <div class="metric-label">NOWPayments / month</div>
-      <div class="metric-val" id="np-final">—</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label">Fireblocks / month</div>
-      <div class="metric-val" id="fb-final">—</div>
-    </div>
+  <div class="callout c-amber">
+    <strong>The core issue:</strong> Steps 1, 2, 4, 5, and 6 work. Step 3 is entirely manual, serial, and grows with every new freelancer or token added. The lack of a consistent tracking view means Kunal, Mally, and freelancers are frequently out of sync on where any given trace is in its lifecycle — creating avoidable back-and-forth across Telegram.
   </div>
-
-  <!-- VERDICT -->
-  <div class="verdict" id="verdict">
-    Adjust the sliders to see your cost estimate.
-  </div>
-
-  <footer>
-    <span><span class="dot"></span>Live calculation</span>
-    <span>Chainlabs REX · Internal use only</span>
-  </footer>
-
 </div>
 
+<!-- 02 NOTIFICATION FLOW -->
+<div class="section">
+  <div class="section-head">02 — Proposed notification flow via REX Bot</div>
+
+  <p style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">An early-stage idea discussed between Kunal and Mally — not yet finalised or scoped for implementation. The REX Bot is already live on Render and connected to Telegram. The goal is status-driven notifications that eliminate the informal, inconsistent back-and-forth currently spread across multiple group chats. The bot messages freelancers individually and pings Kunal and Mally in a dedicated ops groupchat — keeping existing freelancer groups clean from operational noise. The bot does not replace those groups.</p>
+
+  <div class="status-flow">
+    <span class="sp sp-gray">Dep - Pending</span><span class="arr">→</span>
+    <span class="sp sp-amber">Dep - Sent</span><span class="arr">→</span>
+    <span class="sp sp-blue">Dep - Received</span><span class="arr">→</span>
+    <span class="sp sp-purple">With - Pending</span><span class="arr">→</span>
+    <span class="sp sp-teal">With - Sent</span><span class="arr">→</span>
+    <span class="sp sp-green">With - Received</span>
+  </div>
+  <div style="margin-top:6px;margin-bottom:14px">
+    <span class="sp sp-red" style="font-size:11px">Dep - Issue / With - Issue</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:8px;">flags directly into the relevant freelancer group for immediate discussion</span>
+  </div>
+
+  <div class="bot-wrap">
+    <div class="bot-label">REX Bot — example notification messages</div>
+    <div class="bot-msg">
+      <div class="bot-from">To: Freelancer X (individual DM) · on Dep - Sent</div>
+      Funds have been sent to your ByBit account — 0.000030 BTC is on its way. Please confirm once received.
+    </div>
+    <div class="bot-msg">
+      <div class="bot-from">To: REX Ops groupchat (Kunal + Mally) · on Dep - Received</div>
+      Freelancer X confirmed deposit received on ByBit (BTC). Status updated to Dep - Received. Withdrawal - Pending set — no action needed.
+    </div>
+    <div class="bot-msg">
+      <div class="bot-from">To: Freelancer X (individual DM) · on With - Pending</div>
+      ByBit BTC deposit trace confirmed. Please complete the withdrawal back to the Chainlabs return address when ready.
+    </div>
+    <div class="bot-msg">
+      <div class="bot-from">To: REX Ops groupchat · on With - Sent</div>
+      Freelancer X submitted ByBit (BTC) withdrawal. TXID received. Please confirm receipt and mark With - Received.
+    </div>
+    <div class="bot-msg">
+      <div class="bot-from">To: Freelancer group · on Dep - Issue or With - Issue</div>
+      There is an issue flagged on your ByBit (BTC) trace. Kunal will reach out directly to resolve.
+    </div>
+    <div class="bot-note">No reply command needed from freelancers — the notification is informational. Status updates are made directly in the sheet (or Retool once migrated), which triggers the next bot message automatically. Retool Workflows natively supports webhook triggers (docs.retool.com/workflows/guides/webhooks) meaning the same notification logic can be replicated without Google Apps Script when we move off Sheets — a status change in Retool fires a POST to the webhook endpoint, which the bot picks up and routes to the right Telegram chat.</div>
+  </div>
+
+  <div class="callout c-purple">
+    <strong>Why notifications only, no replies:</strong> Requiring freelancers to reply with commands adds friction and creates a new failure point. The bot's job is to inform — status updates stay in the source of truth (Sheet or Retool), not in Telegram. Issue statuses are the exception — those surface into the group so the conversation happens naturally, where everyone can see it.
+  </div>
+</div>
+
+<!-- 03 TRANSACTION TRACKING -->
+<div class="section">
+  <div class="section-head">03 — Transaction tracking: sheet to NOWPayments CSV</div>
+
+  <p style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px;">The freelancer sheet already captures everything NOWPayments needs. Filter Transactions tab for Dep - Pending, export, map to NOWPayments CSV template, upload. One 2FA confirmation fires all sends. Below is a live example — token data from a real freelancer sheet, mapped directly to the payout format.</p>
+
+  <p style="font-family:var(--mono);font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Source — freelancer sheet (Dep - Pending rows, ByBit)</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Token</th><th>Min amount</th><th>To (entity)</th><th>Address</th><th>Memo</th><th>Proof</th></tr></thead>
+      <tbody>
+        <tr><td class="td-a">BTC</td><td class="mono-xs">0.000010</td><td>ByBit</td><td class="mono-xs">1AP514M5KEhAhB4X9reH2wt9qB64wuMcza</td><td class="td-m">—</td><td class="td-g">IMG_6080.PNG</td></tr>
+        <tr><td class="td-a">ARB</td><td class="mono-xs">0.010000</td><td>ByBit</td><td class="mono-xs">0xf3280dbace6e163d80a74cd72fadbff4f776a4c7</td><td class="td-m">—</td><td class="td-g">IMG_6084.PNG</td></tr>
+        <tr><td class="td-a">DOGE</td><td class="mono-xs">0.005000</td><td>ByBit</td><td class="mono-xs">DCMWrgJ62uzyGPpKB4UTaX3xhnkgz6BApn</td><td class="td-m">—</td><td class="td-g">IMG_6089.PNG</td></tr>
+        <tr><td class="td-a">TON</td><td class="mono-xs">0.050000</td><td>ByBit</td><td class="mono-xs">UQDH0dKFsQh4uIRlgI11MC_kIwIBF1HsTR3q8OUnMDRXmd7S</td><td class="td-m">—</td><td class="td-g">IMG_6093.PNG</td></tr>
+        <tr><td class="td-a">XRP</td><td class="mono-xs">0.010000</td><td>ByBit</td><td class="mono-xs">r4rjtVAtG3gmcDHU3nmXdYKcVSbvGPF7Fa</td><td class="td-b">503195301</td><td class="td-g">IMG_6098.PNG</td></tr>
+        <tr><td class="td-a">SOL</td><td class="mono-xs">0.001000</td><td>ByBit</td><td class="mono-xs">FN13k4WZg4McSDDeHncumg5fLPVH36vcCskRuygrMige</td><td class="td-m">—</td><td class="td-g">IMG_6096.PNG</td></tr>
+        <tr><td class="td-a">TRX</td><td class="mono-xs">1.000000</td><td>ByBit</td><td class="mono-xs">TVEYw7nTy2a1d5GPK6GPW3cNDTFfKxhfBj</td><td class="td-m">—</td><td class="td-g">IMG_6094.PNG</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="font-family:var(--mono);font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:0.1em;margin:16px 0 8px;">Output — NOWPayments CSV (upload-ready)</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Ticker</th><th>Wallet Address</th><th>ExtraId (memo/tag)</th><th>Amount (6dp)</th><th>Payout description</th></tr></thead>
+      <tbody>
+        <tr><td class="td-g">BTC</td><td class="mono-xs">1AP514M5KEhAhB4X9reH2wt9qB64wuMcza</td><td class="td-m">—</td><td class="td-g">0.000030</td><td class="td-m">ByBit - Freelancer X</td></tr>
+        <tr><td class="td-g">ARB</td><td class="mono-xs">0xf3280dbace6e163d80a74cd72fadbff4f776a4c7</td><td class="td-m">—</td><td class="td-g">0.030000</td><td class="td-m">ByBit - Freelancer X</td></tr>
+        <tr><td class="td-g">DOGE</td><td class="mono-xs">DCMWrgJ62uzyGPpKB4UTaX3xhnkgz6BApn</td><td class="td-m">—</td><td class="td-g">0.009000</td><td class="td-m">ByBit - Freelancer X</td></tr>
+        <tr><td class="td-g">TON</td><td class="mono-xs">UQDH0dKFsQh4uIRlgI11MC_kIwIBF1HsTR3q8OUnMDRXmd7S</td><td class="td-m">—</td><td class="td-g">0.100000</td><td class="td-m">ByBit - Freelancer X</td></tr>
+        <tr><td class="td-g">XRP</td><td class="mono-xs">r4rjtVAtG3gmcDHU3nmXdYKcVSbvGPF7Fa</td><td class="td-b">503195301</td><td class="td-g">0.090000</td><td class="td-m">ByBit - Freelancer X</td></tr>
+        <tr><td class="td-g">SOL</td><td class="mono-xs">FN13k4WZg4McSDDeHncumg5fLPVH36vcCskRuygrMige</td><td class="td-m">—</td><td class="td-g">0.009000</td><td class="td-m">ByBit - Freelancer X</td></tr>
+        <tr><td class="td-g">TRX</td><td class="mono-xs">TVEYw7nTy2a1d5GPK6GPW3cNDTFfKxhfBj</td><td class="td-m">—</td><td class="td-g">2.000000</td><td class="td-m">ByBit - Freelancer X</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout c-green" style="margin-top:12px">
+    <strong>Key mapping notes:</strong> XRP destination tag maps directly to ExtraId — already captured in the sheet memo field. The Payout description (ByBit - Freelancer X) is searchable in the NOWPayments dashboard and exportable for accounting. Amounts capped to 6 decimal places as required. This CSV can be auto-generated from any source of truth — Google Sheets today, Retool when we migrate.
+  </div>
+</div>
+
+<!-- 04 COST MODEL -->
+<div class="section">
+  <div class="section-head">04 — Cost model</div>
+  <div class="assumptions">
+    <div class="slider-row">
+      <div class="slider-hdr"><span class="slider-label">Active freelancers</span><span class="slider-val" id="out-fl">30</span></div>
+      <input type="range" min="5" max="47" value="30" id="sl-fl">
+    </div>
+    <div class="slider-row">
+      <div class="slider-hdr"><span class="slider-label">Token sends per freelancer / month</span><span class="slider-val" id="out-s">17</span></div>
+      <input type="range" min="3" max="30" value="17" id="sl-s">
+    </div>
+    <div class="slider-row">
+      <div class="slider-hdr"><span class="slider-label">Avg send size (USD equiv.)</span><span class="slider-val" id="out-sz">$5</span></div>
+      <input type="range" min="1" max="25" value="5" id="sl-sz">
+    </div>
+    <div class="derived">
+      <div><div class="dl">Total sends / mo</div><div class="dv" id="d-s">510</div></div>
+      <div><div class="dl">Volume (USD) / mo</div><div class="dv" id="d-v">$2,550</div></div>
+      <div><div class="dl">Wallet rotations</div><div class="dv">Periodic</div></div>
+    </div>
+  </div>
+
+  <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;">On-chain network fees are paid regardless of which platform we use. The breakdown below covers all chains we currently monitor — grouped by cost profile.</p>
+
+  <div class="fee-grid">
+    <div class="fee-item"><div class="fee-chain">Solana (SOL)</div><div class="fee-cost cheap">~$0.001</div><div class="fee-note">Near zero. Fastest finality.</div></div>
+    <div class="fee-item"><div class="fee-chain">Polygon (USDT-POL)</div><div class="fee-cost cheap">~$0.01</div><div class="fee-note">Default freelancer payment rail.</div></div>
+    <div class="fee-item"><div class="fee-chain">Litecoin (LTC)</div><div class="fee-cost cheap">~$0.01–0.05</div><div class="fee-note">Fast, cheap, widely listed.</div></div>
+    <div class="fee-item"><div class="fee-chain">XRP (Ripple)</div><div class="fee-cost cheap">~$0.01–0.05</div><div class="fee-note">Requires destination tag — already captured.</div></div>
+    <div class="fee-item"><div class="fee-chain">TON</div><div class="fee-cost cheap">~$0.01–0.05</div><div class="fee-note">Requires memo — already captured.</div></div>
+    <div class="fee-item"><div class="fee-chain">Stellar (XLM)</div><div class="fee-cost cheap">~$0.01</div><div class="fee-note">Requires memo — already captured.</div></div>
+    <div class="fee-item"><div class="fee-chain">TRON (TRX/USDT-TRC20)</div><div class="fee-cost cheap">~$0.20–0.50</div><div class="fee-note">High use across Africa and Asia.</div></div>
+    <div class="fee-item"><div class="fee-chain">Dogecoin (DOGE)</div><div class="fee-cost cheap">~$0.10–0.30</div><div class="fee-note">Common on African regional exchanges.</div></div>
+    <div class="fee-item"><div class="fee-chain">Cardano (ADA)</div><div class="fee-cost cheap">~$0.15–0.30</div><div class="fee-note">Fixed fee model — predictable.</div></div>
+    <div class="fee-item"><div class="fee-chain">Arbitrum (ARB)</div><div class="fee-cost mid">~$0.05–0.20</div><div class="fee-note">L2 — cheaper than mainnet ETH.</div></div>
+    <div class="fee-item"><div class="fee-chain">Optimism (OP)</div><div class="fee-cost mid">~$0.05–0.20</div><div class="fee-note">L2 — same EVM address format as ARB.</div></div>
+    <div class="fee-item"><div class="fee-chain">BNB / BSC</div><div class="fee-cost mid">~$0.10–0.50</div><div class="fee-note">EVM-compatible, moderate cost.</div></div>
+    <div class="fee-item"><div class="fee-chain">Polkadot (DOT)</div><div class="fee-cost mid">~$0.10–0.30</div><div class="fee-note">Moderate. Substrate network.</div></div>
+    <div class="fee-item"><div class="fee-chain">Bitcoin (BTC)</div><div class="fee-cost pricey">~$1.00–3.00</div><div class="fee-note">Highest fee. ~15% of our sends.</div></div>
+    <div class="fee-item"><div class="fee-chain">Ethereum (ETH/ERC20)</div><div class="fee-cost pricey">~$1.00–5.00</div><div class="fee-note">Variable with congestion. ~10% of sends.</div></div>
+  </div>
+
+  <div class="cards" style="margin-top:20px">
+    <div class="card rec">
+      <div class="badge badge-g">Recommended</div>
+      <div class="card-name">NOWPayments</div>
+      <div class="card-sub">Mass payouts — CSV or API</div>
+      <div class="price gp" id="np-p">—</div>
+      <div class="price-note">estimated total / month</div>
+      <hr class="dv">
+      <div class="fr"><span class="fl">Platform fee</span><span class="fv g">$0 / month</span></div>
+      <div class="fr"><span class="fl">Payout service fee</span><span class="fv g">0%</span></div>
+      <div class="fr"><span class="fl">Custody deposit (0.5% of volume)</span><span class="fv a" id="np-c">—</span></div>
+      <hr class="dv">
+      <div class="fr"><span class="fl">SOL / XLM / Polygon</span><span class="fv g">~$0.01 avg</span></div>
+      <div class="fr"><span class="fl">LTC / XRP / TON / TON / ADA / DOGE</span><span class="fv g">~$0.05–0.30 avg</span></div>
+      <div class="fr"><span class="fl">ARB / OP / BNB / DOT / TRX</span><span class="fv a">~$0.20–0.50 avg</span></div>
+      <div class="fr"><span class="fl">BTC / ETH / ERC20</span><span class="fv a">~$1.00–5.00 avg</span></div>
+      <div class="fr" style="border-top:0.5px solid var(--border);margin-top:6px;padding-top:8px"><span class="fl">Blended network fees (est.)</span><span class="fv a" id="np-n">—</span></div>
+      <hr class="dv">
+      <div class="fr"><span class="fl">Multi-chain coverage</span><span class="fv g">350+ coins incl. all 21</span></div>
+      <div class="fr"><span class="fl">Memo / ExtraId support</span><span class="fv g">Yes (XRP, TON, XLM etc.)</span></div>
+      <div class="fr"><span class="fl">Separate portfolio accounts</span><span class="fv g">Yes — per workstream</span></div>
+      <div class="fr"><span class="fl">CSV batch upload</span><span class="fv g">Yes — one 2FA confirmation</span></div>
+      <div class="fr"><span class="fl">Wallet rotation</span><span class="fv a">Periodic — scripted via API</span></div>
+      <div class="fr"><span class="fl">Setup time</span><span class="fv g">Same week — no KYB required</span></div>
+      <div class="card-foot">Pre-fund custody balance per portfolio. Export Dep-Pending rows as CSV, upload, one confirmation fires all sends. Dashboard gives team-wide real-time visibility of balances, spend history, and costs per portfolio and workstream.</div>
+    </div>
+    <div class="card">
+      <div class="badge badge-b">Enterprise</div>
+      <div class="card-name">Fireblocks</div>
+      <div class="card-sub">Institutional treasury infrastructure</div>
+      <div class="price" id="fb-p">—</div>
+      <div class="price-note">estimated total / month</div>
+      <hr class="dv">
+      <div class="fr"><span class="fl">Essentials plan floor</span><span class="fv a">~$1,000–2,000/mo</span></div>
+      <div class="fr"><span class="fl">Transaction fee (0.20% outbound)</span><span class="fv a" id="fb-t">—</span></div>
+      <hr class="dv">
+      <div class="fr"><span class="fl">SOL / XLM / Polygon</span><span class="fv g">~$0.01 avg</span></div>
+      <div class="fr"><span class="fl">LTC / XRP / TON / ADA / DOGE</span><span class="fv g">~$0.05–0.30 avg</span></div>
+      <div class="fr"><span class="fl">ARB / OP / BNB / DOT / TRX</span><span class="fv a">~$0.20–0.50 avg</span></div>
+      <div class="fr"><span class="fl">BTC / ETH / ERC20</span><span class="fv a">~$1.00–5.00 avg</span></div>
+      <div class="fr" style="border-top:0.5px solid var(--border);margin-top:6px;padding-top:8px"><span class="fl">Blended network fees (est.)</span><span class="fv a" id="fb-n">—</span></div>
+      <hr class="dv">
+      <div class="fr"><span class="fl">Multi-chain coverage</span><span class="fv g">150+ blockchains</span></div>
+      <div class="fr"><span class="fl">Separate portfolio accounts</span><span class="fv g">Yes — vault accounts</span></div>
+      <div class="fr"><span class="fl">Policy engine / approvals</span><span class="fv g">Yes — granular</span></div>
+      <div class="fr"><span class="fl">Wallet rotation</span><span class="fv g">Native — fully automated</span></div>
+      <div class="fr"><span class="fl">KYB and legal onboarding</span><span class="fv r">Weeks + legal review</span></div>
+      <div class="fr"><span class="fl">Setup time</span><span class="fv r">4–8 weeks minimum</span></div>
+      <div class="card-foot">Custom enterprise pricing — $1,500/mo is the public floor estimate. Actual quote requires a sales call. Platform fee alone likely exceeds total NOWPayments bill at current REX scale. Worth revisiting when Chainlabs manages more than $1M/month or needs institutional custody reporting for enterprise client pitches.</div>
+    </div>
+  </div>
+
+  <div class="totals">
+    <div class="metric win"><div class="ml">NOWPayments / month</div><div class="mv" id="np-f">—</div></div>
+    <div class="metric"><div class="ml">Fireblocks / month</div><div class="mv" id="fb-f">—</div></div>
+  </div>
+  <div class="verdict" id="verdict">Adjust the sliders above to model your scenario.</div>
+</div>
+
+<!-- 05 WALLET ROTATION -->
+<div class="section">
+  <div class="section-head">05 — Wallet rotation strategy</div>
+
+  <p style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">This is an important operational consideration independent of the tool decision. We have repeatedly experienced exchange-level blockers — deposit addresses flagged, withdrawals held, accounts temporarily restricted — as a direct consequence of transaction history accumulating on our Chainlabs return addresses.</p>
+
+  <div class="callout c-amber">
+    <strong>Why the blockers happen:</strong> Our return addresses build up a pattern of high-frequency micro-deposits across dozens of token types from many different exchange sources. To an exchange risk engine, this looks anomalous. The longer a single address is in use, the higher the flag probability. Rotating addresses breaks the pattern and resets our risk profile.
+  </div>
+
+  <p style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7;margin:14px 0;">The right rotation cadence will need to be determined based on our actual blocker frequency and volume — there is no fixed rule. What matters is that it becomes a proactive, scheduled operation rather than a reactive scramble when a blocker hits.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Aspect</th><th>Current state</th><th>NOWPayments</th><th>Fireblocks</th></tr></thead>
+      <tbody>
+        <tr><td>Rotation cadence</td><td class="td-a">Reactive — when blockers hit</td><td class="td-g">Periodic — scheduled, proactive</td><td class="td-g">Automated — rule-based triggers</td></tr>
+        <tr><td>Address generation</td><td class="td-a">Manual per chain</td><td class="td-g">API-generated in batch</td><td class="td-g">Native — fully automated</td></tr>
+        <tr><td>Distribution to freelancers</td><td class="td-a">Manual via Telegram</td><td class="td-g">Script pushes to sheets or Retool</td><td class="td-g">API-driven — automated</td></tr>
+        <tr><td>Address history and archive</td><td class="td-a">No formal log</td><td class="td-g">Dashboard — full history per portfolio</td><td class="td-g">Full audit trail — policy engine</td></tr>
+        <tr><td>Compliance posture</td><td class="td-a">Reactive</td><td class="td-g">Proactive</td><td class="td-g">Proactive — institutional grade</td></tr>
+        <tr><td>Effort per rotation</td><td class="td-a">High — manual across all chains</td><td class="td-a">Low — scripted (~1 day build once)</td><td class="td-g">Minimal — native automation</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 06 CENTRALISED VISIBILITY -->
+<div class="section">
+  <div class="section-head">06 — Centralised visibility and portfolio separation</div>
+
+  <p style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">We do not have a single place where the team can see what has been sent, what is pending, what each chain has cost us, or when we need to top up a balance. Beyond freelancers, Kunal, Mally, Lucas, and other in-house tracers are all operating in silos — trace activity often mixed in with personal CEX accounts, with no unified view of what is happening across the operation at any moment. This is both an ops problem and an accounting problem.</p>
+
+  <div class="callout c-blue">
+    <strong>What centralised visibility unlocks:</strong> Preempt top-ups before hitting zero on a chain. Understand which tokens and chains are costing the most. Spot fee anomalies early. Build monthly cost reports per workstream without manual reconciliation. Give leadership an accurate picture of trace funding spend on demand.
+  </div>
+
+  <p style="font-family:var(--mono);font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:0.1em;margin:18px 0 10px;">Proposed portfolio separation</p>
+  <div class="port-grid">
+    <div class="port-card pgc">
+      <div class="port-accent pa-g"></div>
+      <div class="port-name">REX Tracing</div>
+      <div class="port-desc">Core freelancer trace sends across all 30 active researchers. Primary workstream. Funded and rotated on its own schedule.</div>
+    </div>
+    <div class="port-card pbc">
+      <div class="port-accent pa-b"></div>
+      <div class="port-name">Ad Hoc Clients</div>
+      <div class="port-desc">Separate balance per active client — Chainalysis, Elliptic, Crystal, Addressable. Each isolated for accurate cost recovery and client billing.</div>
+    </div>
+    <div class="port-card ptc">
+      <div class="port-accent pa-t"></div>
+      <div class="port-name">OTC</div>
+      <div class="port-desc">OTC tracing workstream — separate from freelancer REX volume to keep reporting clean.</div>
+    </div>
+    <div class="port-card pac">
+      <div class="port-accent pa-a"></div>
+      <div class="port-name">General Tier</div>
+      <div class="port-desc">Catch-all for trace sends outside defined workstreams. Can be split further as the operation grows.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 07 WHAT CHANGES -->
+<div class="section">
+  <div class="section-head">07 — What actually changes with NOWPayments</div>
+  <div class="changes">
+    <div class="change-card gc">
+      <div class="change-head">Step 3 — hours to minutes</div>
+      <div class="change-body">One CSV upload replaces 500+ individual Exodus sends. One 2FA confirmation fires everything simultaneously across all chains.</div>
+    </div>
+    <div class="change-card gc">
+      <div class="change-head">All 21 chains in one place</div>
+      <div class="change-body">BTC, ETH, LTC, XRP, ADA, SOL, TRX, DOGE, DOT, TON, BNB, ARB, OP, USDT-TRC20, USDT-ERC20, BCH, UNI — one custody balance, one dashboard.</div>
+    </div>
+    <div class="change-card gc">
+      <div class="change-head">Real-time team visibility</div>
+      <div class="change-body">Kunal, Mally, Lucas, and in-house tracers all see live balances, transaction history, and cost breakdowns per portfolio — no silos, no manual reconciliation.</div>
+    </div>
+    <div class="change-card gc">
+      <div class="change-head">Portfolio separation</div>
+      <div class="change-body">REX, Ad Hoc clients, OTC, and General Tier each have isolated balances, history, and exportable reporting — ready for client cost recovery conversations.</div>
+    </div>
+    <div class="change-card ac">
+      <div class="change-head">Custody float sign-off needed</div>
+      <div class="change-body">Funds sit in NOWPayments custody until disbursed. Basile sign-off on float amount required before setup. Standard for any payment processor.</div>
+    </div>
+    <div class="change-card ac">
+      <div class="change-head">Rotation build — one-time</div>
+      <div class="change-body">Scripted rotation (NOWPayments API generating new addresses, pushed to Sheets or Retool) is a one-time build. Once done, rotation is a scheduled low-effort operation.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:middle;animation:blink 2.5s ease-in-out infinite"></span>Live cost calculation</span>
+  <span>Chainlabs REX · Internal use only · March 2026</span>
+</footer>
+
+</div>
 <script>
-  function fmt(n) {
-    return '$' + Math.round(n).toLocaleString('en-US');
-  }
-
-  function update() {
-    const freelancers = parseInt(document.getElementById('sl-freelancers').value);
-    const sends = parseInt(document.getElementById('sl-sends').value);
-    const size = parseInt(document.getElementById('sl-size').value);
-
-    document.getElementById('out-freelancers').textContent = freelancers;
-    document.getElementById('out-sends').textContent = sends;
-    document.getElementById('out-size').textContent = '$' + size;
-
-    const totalSends = freelancers * sends;
-    const totalVol = totalSends * size;
-
-    document.getElementById('d-sends').textContent = totalSends.toLocaleString();
-    document.getElementById('d-vol').textContent = fmt(totalVol);
-
-    // NOWPayments
-    const npCustody = totalVol * 0.005;
-    const npNetwork = (totalSends * 0.60 * 0.15) + (totalSends * 0.25 * 1.50) + (totalSends * 0.15 * 2.00);
-    const npTotal = npCustody + npNetwork;
-
-    document.getElementById('np-custody').textContent = fmt(npCustody);
-    document.getElementById('np-network').textContent = fmt(npNetwork);
-    document.getElementById('np-total').textContent = fmt(npTotal) + '/mo';
-    document.getElementById('np-final').textContent = fmt(npTotal);
-
-    // Fireblocks
-    const fbPlatform = 1500;
-    const fbTx = totalVol * 0.002;
-    const fbNetwork = npNetwork;
-    const fbTotal = fbPlatform + fbTx + fbNetwork;
-
-    document.getElementById('fb-tx').textContent = fmt(fbTx);
-    document.getElementById('fb-network').textContent = fmt(fbNetwork);
-    document.getElementById('fb-total').textContent = fmt(fbTotal) + '/mo';
-    document.getElementById('fb-final').textContent = fmt(fbTotal);
-
-    const saving = fbTotal - npTotal;
-    const savingPct = Math.round((saving / fbTotal) * 100);
-    const annual = saving * 12;
-
-    document.getElementById('verdict').innerHTML =
-      'At <strong>' + freelancers + ' freelancers</strong> running <strong>' + sends + ' sends each</strong>, NOWPayments costs <span class="highlight-green">' + fmt(npTotal) + '/mo</span> vs Fireblocks at <span class="highlight-amber">' + fmt(fbTotal) + '/mo</span>. ' +
-      'That\'s a saving of <strong>' + fmt(saving) + '/month (' + savingPct + '%)</strong> — or <strong>' + fmt(annual) + ' annually</strong>. The Fireblocks platform fee alone (~$1,500/mo) is larger than your entire NOWPayments bill. Fireblocks only makes sense once Chainlabs is managing >$1M/month in assets or needs institutional compliance reporting for enterprise clients.';
-  }
-
-  ['sl-freelancers', 'sl-sends', 'sl-size'].forEach(function(id) {
-    document.getElementById(id).addEventListener('input', update);
-  });
-
-  update();
+function fmt(n){return '$'+Math.round(n).toLocaleString('en-US');}
+function update(){
+  var fl=+document.getElementById('sl-fl').value;
+  var s=+document.getElementById('sl-s').value;
+  var sz=+document.getElementById('sl-sz').value;
+  document.getElementById('out-fl').textContent=fl;
+  document.getElementById('out-s').textContent=s;
+  document.getElementById('out-sz').textContent='$'+sz;
+  var ts=fl*s,vol=ts*sz;
+  document.getElementById('d-s').textContent=ts.toLocaleString();
+  document.getElementById('d-v').textContent=fmt(vol);
+  var npC=vol*0.005;
+  var cheap=ts*0.35*0.05, mid=ts*0.40*0.35, pricey=ts*0.25*2.5;
+  var npN=cheap+mid+pricey;
+  var npT=npC+npN;
+  document.getElementById('np-c').textContent=fmt(npC);
+  document.getElementById('np-n').textContent=fmt(npN);
+  document.getElementById('np-p').textContent=fmt(npT)+'/mo';
+  document.getElementById('np-f').textContent=fmt(npT);
+  var fbT=1500+(vol*0.002)+npN;
+  document.getElementById('fb-t').textContent=fmt(vol*0.002);
+  document.getElementById('fb-n').textContent=fmt(npN);
+  document.getElementById('fb-p').textContent=fmt(fbT)+'/mo';
+  document.getElementById('fb-f').textContent=fmt(fbT);
+  var save=fbT-npT,pct=Math.round(save/fbT*100),annual=save*12;
+  document.getElementById('verdict').innerHTML=
+    'At <strong>'+fl+' freelancers</strong> running <strong>'+s+' sends each</strong>, NOWPayments costs <span class="g">'+fmt(npT)+'/mo</span> vs Fireblocks at <span class="a">'+fmt(fbT)+'/mo</span>. '+
+    'That\'s <strong>'+fmt(save)+'/month saved ('+pct+'%)</strong> or <strong>'+fmt(annual)+' per year</strong>. The Fireblocks platform floor (~$1,500/mo) alone exceeds the entire NOWPayments bill at current scale. '+
+    'Fireblocks becomes worth evaluating when Chainlabs manages more than $1M/month in assets or needs institutional custody reporting for enterprise client pitches.';
+}
+['sl-fl','sl-s','sl-sz'].forEach(function(id){document.getElementById(id).addEventListener('input',update);});
+update();
 </script>
 </body>
 </html>
